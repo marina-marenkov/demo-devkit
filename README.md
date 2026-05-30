@@ -1,131 +1,135 @@
 # devkit
 
-`devkit` is a Node.js CLI for quick repository diagnostics.
+`devkit` is a zero-dependency Node.js command-line tool that helps you inspect repository quality, activity, and risk quickly.
 
-## Local repo setup and run
+## Project purpose
 
-From this repository root:
+This project is meant to be a lightweight "developer toolbox" for local repositories.  
+Instead of installing multiple heavy tools, `devkit` provides a small set of focused checks:
+
+- release visibility (`changelog`)
+- dependency license visibility (`license`)
+- repository hygiene checks (`health`)
+- source size/codebase profile (`stats`)
+- accidental secret detection (`secrets`)
+
+It is designed for local development workflows, pre-PR checks, and CI smoke checks.
+
+## Quick start
+
+From repository root:
 
 ```bash
 npm install
 ```
 
-Run directly without linking:
+Run directly:
 
 ```bash
 node ./bin/devkit.js <command>
 ```
 
-Or expose the `devkit` command locally:
+Or link globally for local usage:
 
 ```bash
 npm link
+devkit <command>
 ```
 
-Usage:
+Supported commands:
 
 ```text
 devkit <changelog|license|health|stats|secrets>
 ```
 
-If you run an unknown command (or no command), it prints usage and exits with code `1`.
+If command is missing or unknown, usage is printed and process exits with code `1`.
 
-## Command examples
+## Usage examples
 
 ### `devkit changelog`
-Builds a changelog from `git log --pretty=format:%s` using Conventional Commit types.
+Generate changelog sections from Conventional Commit messages in `git log`.
 
 ```bash
 devkit changelog
 ```
 
-Example output:
+Save output to a file:
 
-```text
-# Changelog
-
-## Features
-- **cli:** add changelog command
-
-## Bug Fixes
-- handle git failures
-```
-
-If no conventional commits are found, it prints:
-
-```text
-_No conventional commits found._
+```bash
+devkit changelog > CHANGELOG.generated.md
 ```
 
 ### `devkit license`
-Scans `node_modules/**/package.json` and prints unique, normalized licenses sorted alphabetically.
+Scan `node_modules/**/package.json` and print unique licenses (sorted).
 
 ```bash
 devkit license
 ```
 
-Example output:
+Use in CI to snapshot licenses:
 
-```text
-Apache-2.0
-BSD-3-Clause
-ISC
-MIT
+```bash
+devkit license > licenses.txt
 ```
 
-Note: this command requires a `node_modules` directory. If missing, it exits with code `1` and prints an error.
-
 ### `devkit health`
-Checks for 5 repo health signals: `README.md`, tests, CI workflow, `.gitignore`, and `package-lock.json`.
+Check repository health based on:
+- `README.md`
+- tests
+- CI workflow (`.github/workflows/*.yml|*.yaml`)
+- `.gitignore`
+- `package-lock.json`
 
 ```bash
 devkit health
 ```
 
-Example output:
+Example:
 
 ```text
 ✓ README.md
 ✓ tests directory/files
 ✗ CI workflow
-✗ .gitignore
-✗ package-lock.json
-Total score: 2/5 (40%)
+✓ .gitignore
+✓ package-lock.json
+Total score: 4/5 (80%)
 ```
 
 ### `devkit stats`
-Counts lines by file extension and shows the top 5 biggest files (bytes), excluding `.git` and `node_modules` directories.
+Show lines-per-extension and top 5 largest files by bytes.
 
 ```bash
 devkit stats
 ```
 
-Example output:
+Use for quick refactor targeting:
 
-```text
-Lines by extension:
-.js 1156
-.json 10
-.md 129
-
-Top 5 biggest files:
-3556 src/commands/changelog.js
-3297 src/commands/secrets.js
-...
+```bash
+devkit stats | head -n 20
 ```
 
 ### `devkit secrets`
-Scans git-tracked files (`git ls-files`) for common secret patterns (AWS access keys, GitHub tokens, generic credential assignments).
+Scan git-tracked files for token/key-like patterns.
 
 ```bash
 devkit secrets
 ```
 
-Example output when clean:
+Pre-commit/pre-push usage:
 
-```text
-No suspicious secrets found in tracked files.
+```bash
+devkit secrets && echo "No obvious secrets found"
 ```
 
-If matches are found, it reports `file:line [pattern]`, prints a total, and exits with code `1`.  
-If `git ls-files` fails (for example outside a git repo), it exits with code `2`.
+## Exit behavior notes
+
+- `license` exits non-zero when `node_modules` is missing.
+- `secrets` exits `1` when potential secrets are found, `0` when clean, and `2` when tracked files cannot be resolved with git.
+
+## Recommendations to extend this project
+
+1. Add optional flags for every command (`--json`, `--path`, `--max-files`) to support automation.
+2. Add configurable rules via a project config file (for example `.devkitrc.json`) so teams can customize secret patterns and health criteria.
+3. Expand `health` with additional checks (CODEOWNERS, SECURITY.md, Dependabot, branch protection signal stubs).
+4. Add baseline/snapshot mode for `stats` and `license` to compare drift over time.
+5. Add output adapters (plain text + JSON) to make CI integrations easier without parsing free-form text.
