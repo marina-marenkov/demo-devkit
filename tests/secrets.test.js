@@ -1,8 +1,24 @@
+/**
+ * Tests for the `secrets` command (`src/commands/secrets.js`).
+ *
+ * Covers:
+ *  - Detection of representative secret patterns (AWS key, GitHub token,
+ *    generic credential assignment) with a non-zero exit code
+ *  - Clean exit (code 0) and informational message when no secrets are found
+ *  - Clear stderr output and exit code 2 when the git file-listing step fails
+ *
+ * All tests use in-memory file stubs so no real filesystem or git repo is needed.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { run } from '../src/commands/secrets.js';
 
+/**
+ * Creates a writable stream capture helper that accumulates output as a string.
+ *
+ * @returns {{ stream: { write(chunk: unknown): void }, read(): string }}
+ */
 function createStreamCapture() {
   let output = '';
   return {

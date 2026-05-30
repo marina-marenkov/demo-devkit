@@ -1,3 +1,14 @@
+/**
+ * Tests for the `stats` command (`src/commands/stats.js`).
+ *
+ * Covers:
+ *  - Line counts per file extension across a mixed set of text and binary files
+ *  - Identification of the five largest files sorted by byte size
+ *  - Formatted stdout output combining both summaries
+ *
+ * The test creates a temporary directory populated with fixture files and
+ * removes it on completion.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
@@ -16,6 +27,12 @@ const fixtureFiles = [
   { filePath: 'LICENSE', content: 'license text' },
 ];
 
+/**
+ * Writes all `fixtureFiles` into `baseDir`, creating subdirectories as needed.
+ *
+ * @param {string} baseDir - Root directory to populate with fixture files.
+ * @returns {Promise<void>}
+ */
 async function createFixtureDirectory(baseDir) {
   for (const fixture of fixtureFiles) {
     const absolutePath = path.join(baseDir, fixture.filePath);
@@ -24,6 +41,12 @@ async function createFixtureDirectory(baseDir) {
   }
 }
 
+/**
+ * Converts an array of `[key, value]` pairs into a plain object.
+ *
+ * @param {Array<[string, unknown]>} entries - Key/value pairs to convert.
+ * @returns {Record<string, unknown>}
+ */
 function mapFromEntries(entries) {
   return Object.fromEntries(entries);
 }

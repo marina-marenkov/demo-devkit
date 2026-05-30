@@ -1,8 +1,22 @@
+/**
+ * Tests for the `changelog` command (`src/commands/changelog.js`).
+ *
+ * Covers:
+ *  - Grouping conventional commits into labelled changelog sections
+ *  - Fallback message when no conventional commits are present
+ *  - Delegating to `git log` when commit subjects are not injected
+ *  - Error handling when the git command fails
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { run } from '../src/commands/changelog.js';
 
+/**
+ * Creates a writable stream that accumulates all written chunks in memory.
+ *
+ * @returns {{ chunks: string[], write(chunk: unknown): boolean, toString(): string }}
+ */
 function createCaptureStream() {
   return {
     chunks: [],

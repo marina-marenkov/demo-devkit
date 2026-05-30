@@ -1,3 +1,13 @@
+/**
+ * Tests for the `health` command (`src/commands/health.js`).
+ *
+ * Covers:
+ *  - Full score (5/5) when all health signals are present
+ *  - Partial score when some health signals are missing
+ *
+ * Each test creates a temporary directory on disk, populates it with the
+ * relevant files, and cleans up afterwards.
+ */
 import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -7,6 +17,11 @@ import { run } from '../src/commands/health.js';
 
 const TEMP_ROOT = path.join(process.cwd(), '.health-test-repos');
 
+/**
+ * Returns a captured-stdout helper that accumulates written chunks as a string.
+ *
+ * @returns {{ stdout: { write(chunk: unknown): void }, getOutput(): string }}
+ */
 function createStdoutCapture() {
   let output = '';
 
@@ -22,6 +37,12 @@ function createStdoutCapture() {
   };
 }
 
+/**
+ * Creates a temporary directory under `TEMP_ROOT` with the given name prefix.
+ *
+ * @param {string} prefix - Prefix for the temporary directory name.
+ * @returns {Promise<string>} Absolute path to the created directory.
+ */
 async function createTempRepo(prefix) {
   await fs.mkdir(TEMP_ROOT, { recursive: true });
   return fs.mkdtemp(path.join(TEMP_ROOT, prefix));
