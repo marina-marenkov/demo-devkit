@@ -126,10 +126,8 @@ devkit secrets && echo "No obvious secrets found"
 - `license` exits non-zero when `node_modules` is missing.
 - `secrets` exits `1` when potential secrets are found, `0` when clean, and `2` when tracked files cannot be resolved with git.
 
-## Recommendations to extend this project
+## Documentation
 
-1. Add optional flags for every command (`--json`, `--path`, `--max-files`) to support automation.
-2. Add configurable rules via a project config file (for example `.devkitrc.json`) so teams can customize secret patterns and health criteria.
-3. Expand `health` with additional checks (CODEOWNERS, SECURITY.md, Dependabot, branch protection signal stubs).
-4. Add baseline/snapshot mode for `stats` and `license` to compare drift over time.
-5. Add output adapters (plain text + JSON) to make CI integrations easier without parsing free-form text.
+Project internals and architecture are documented in:
+
+- `docs/how-it-works.md`
