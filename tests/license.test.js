@@ -1,3 +1,13 @@
+/**
+ * Tests for the `license` command (`src/commands/license.js`).
+ *
+ * Covers:
+ *  - Listing unique, normalised licenses sorted alphabetically across nested
+ *    `node_modules` package.json files (strings, objects, and arrays)
+ *  - Non-zero exit code with a clear error message when `node_modules` is absent
+ *
+ * Each test creates a temporary directory on disk and cleans it up afterwards.
+ */
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
@@ -5,15 +15,33 @@ import test from 'node:test';
 
 import { run } from '../src/commands/license.js';
 
+/**
+ * Creates a temporary directory whose name includes the given fixture label.
+ *
+ * @param {string} name - A short label embedded in the temporary directory name.
+ * @returns {Promise<string>} Absolute path to the created directory.
+ */
 async function makeFixture(name) {
   return mkdtemp(path.join(process.cwd(), `.license-${name}-`));
 }
 
+/**
+ * Serialises `json` to disk at `filePath`, creating parent directories as needed.
+ *
+ * @param {string} filePath - Absolute path of the file to write.
+ * @param {unknown} json - Value to serialise as JSON.
+ * @returns {Promise<void>}
+ */
 async function writeJson(filePath, json) {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, JSON.stringify(json), 'utf8');
 }
 
+/**
+ * Creates a writable stream collector that accumulates all written chunks.
+ *
+ * @returns {{ stream: { write(chunk: unknown): boolean }, value(): string }}
+ */
 function createCollector() {
   const chunks = [];
   return {
