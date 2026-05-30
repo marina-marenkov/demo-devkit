@@ -1,0 +1,10 @@
+{
+  "name": "devkit",
+  "version": "1.0.0",
+  "description": "Developer toolkit CLI",
+  "type": "module",
+  "bin": { "devkit": "./bin/devkit.js" },
+  "scripts": { "test": "node --test" },
+  "dependencies": {},
+  "devDependencies": {}
+}
